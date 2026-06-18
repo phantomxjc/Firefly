@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>Firefly · 后台</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== 白色星空科技风 ===== */
+:root {
+  --bg: #ffffff;
+  --bg-2: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --border: #e2e8f0;
+  --border-hi: #cbd5e1;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-3: #94a3b8;
+  --accent: #3b82f6;
+  --accent-dim: #eff6ff;
+  --accent-glow: rgba(59, 130, 246, 0.12);
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-ui: 'Sora', system-ui, -apple-system, sans-serif;
+}
+
+/* ===== 星空背景 ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.03) 0%, transparent 20%),
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+/* ===== 容器 ===== */
+#app-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 顶部栏 ===== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: white;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+}
+.logo-text {
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.logo-text span {
+  color: var(--accent);
+}
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.status-dot {
+  width: 6px; height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.logout-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+  margin-top: 0;
+}
+.logout-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* ===== 卡片 ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.04);
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:focus-within {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08), 0 1px 3px rgba(0,0,0,0.04);
+}
+.card:focus-within::before {
+  opacity: 1;
+}
+
+/* ===== 表单 ===== */
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+}
+input, select, textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-ui);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+textarea {
+  min-height: 480px;
+  font-family: var(--font-mono);
+  resize: vertical;
+  line-height: 1.7;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .row { grid-template-columns: 1fr; }
+}
+
+/* ===== 图片上传区 ===== */
+.upload-area {
+  margin-top: 8px;
+  padding: 24px;
+  border: 2px dashed var(--border-hi);
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.25s;
+  background: var(--bg-2);
+}
+.upload-area:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.upload-area.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* ===== 封面图上传按钮 ===== */
+.cover-upload-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 2px dashed var(--border-hi);
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s;
+  margin-top: 4px;
+}
+.cover-upload-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ===== 封面图预览 ===== */
+.cover-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  display: none;
+}
+.cover-preview.show {
+  display: block;
+}
+.cover-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: var(--radius-sm);
+  display: block;
+  margin: 0 auto;
+}
+.cover-preview .remove-btn {
+  display: block;
+  margin: 8px auto 0;
+  padding: 4px 12px;
+  font-size: 12px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cover-preview .remove-btn:hover {
+  background: #fecaca;
+}
+
+/* ===== 按钮 ===== */
+#publish-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  color: white;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
+}
+#publish-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+}
+#publish-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(59, 130, 246, 0.35);
+}
+
+/* ===== 状态提示 ===== */
+#status {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+#status.ok { border: 1px solid #10b981; color: #059669; background: #ecfdf5; }
+#status.err { border: 1px solid #f87171; color: #dc2626; background: #fef2f2; }
+
+/* ===== 锁屏 ===== */
+#lockScreen {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.lock-card {
+  width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+}
+.lock-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+}
+.lock-icon {
+  width: 72px; height: 72px;
+  margin: 0 auto 28px;
+  background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+}
+.pin-input {
+  letter-spacing: 8px;
+  font-size: 22px;
+  text-align: center;
+  padding: 14px;
+  font-family: var(--font-mono);
+  background: var(--bg);
+  border-color: var(--border-hi);
+  color: var(--accent);
+  border-radius: var(--radius);
+  width: 100%;
+  margin-bottom: 20px;
+}
+.pin-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* ===== 设置Token界面 ===== */
+#setupScreen {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+}
+.setup-note {
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: rgba(59, 130, 246, 0.04);
+  border: 1px solid rgba(59, 130, 246, 0.14);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  line-height: 1.7;
+}
+
+/* ===== 动画 ===== */
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card, .topbar, #publish-btn {
+  animation: fadeSlide 0.4s ease both;
+}
+.card:nth-child(2) { animation-delay: 0.06s; }
+</style>
+</head>
+<body>
+
+<!-- ===== 锁屏 ===== -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-icon">🔐</div>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;">Firefly Admin</h2>
+    <p style="font-size:12px;font-family:var(--font-mono);color:var(--text-3);margin-bottom:32px;letter-spacing:0.06em;">ENTER YOUR PIN TO CONTINUE</p>
+    <input id="pinInput" class="pin-input" type="password" maxlength="6" placeholder="• • • • • •" autofocus>
+    <button onclick="unlock()" style="width:100%;padding:14px;border-radius:var(--radius);border:none;background:linear-gradient(135deg,var(--accent) 0%,#7c3aed 100%);color:white;font-weight:600;cursor:pointer;">解锁</button>
+    <p style="font-size:12px;color:var(--text-3);margin-top:20px;">首次使用？<a href="#" onclick="showSetup();return false" style="color:var(--accent);">配置 Token →</a></p>
+  </div>
+</div>
+
+<!-- ===== 主界面 ===== -->
+<div id="app" style="display:none">
+  <div id="app-wrap">
+    <!-- 顶部栏 -->
+    <div class="topbar">
+      <div class="topbar-logo">
+        <div class="logo-mark">✦</div>
+        <div class="logo-text">Firefly<span> · Admin</span></div>
+      </div>
+      <div class="topbar-status">
+        <div class="status-dot"></div>
+        <span>已连接</span>
+        <button class="logout-btn" onclick="logout()">退出登录</button>
+      </div>
+    </div>
+
+    <!-- 编辑卡片（仅发布新文章） -->
+    <div class="card">
+      <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-2);margin-bottom:16px;">📝 新建文章</h2>
+      
+      <label>标题</label>
+      <input id="title" value="新文章" />
+      
+      <label>简介</label>
+      <input id="desc" placeholder="文章简介" />
+      
+      <div class="row">
+        <div>
+          <label>分类</label>
+          <input id="category" list="cats" placeholder="技术 / 随笔" />
+          <datalist id="cats">
+            <option value="文章示例">
+            <option value="技术">
+            <option value="随笔">
+          </datalist>
+        </div>
+        <div>
+          <label>发布日期</label>
+          <input id="date" type="date" />
+        </div>
+      </div>
+      
+      <div class="row">
+        <div>
+          <label>标签（逗号分隔）</label>
+          <input id="tags" list="tagList" placeholder="KaTeX, Math, 示例" />
+          <datalist id="tagList">
+            <option value="KaTeX">
+            <option value="Math">
+            <option value="示例">
+          </datalist>
+        </div>
+        <div>
+          <label>封面图</label>
+          <!-- 修改这里：用按钮代替输入框 -->
+          <button type="button" id="coverUploadBtn" class="cover-upload-btn">
+            📤 点击上传封面图
+          </button>
+          <!-- 隐藏的原始输入框，用于存储路径 -->
+          <input id="image" type="hidden" />
+          <!-- 封面预览区域 -->
+          <div id="coverPreview" class="cover-preview">
+            <img id="coverImg" src="" alt="封面预览">
+            <button type="button" class="remove-btn" onclick="removeCover()">移除封面</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div>
+          <label>草稿</label>
+          <select id="draft">
+            <option value="false">否</option>
+            <option value="true">是</option>
+          </select>
+        </div>
+      </div>
+
+      <label>正文（Markdown / KaTeX）</label>
+      <textarea id="body">## 正文开始\n\n</textarea>
+      <div id="drop" class="upload-area">
+        📎 点击 / 拖拽 / 粘贴上传图片<br>
+        <span style="font-size:11px;font-family:var(--font-mono);">将保存到 public/img/uploads/年/月/</span>
+      </div>
+      <div id="status"></div>
+    </div>
+
+    <!-- 发布按钮 -->
+    <button id="publish-btn" onclick="publish()">🚀 发布文章</button>
+  </div>
+</div>
+
+<!-- ===== 设置Token ===== -->
+<div id="setupScreen" style="display:none">
+  <div id="app-wrap">
+    <div class="setup-card">
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:36px;">🔑 首次配置</h2>
+      <label>GitHub Token（ghp_...）</label>
+      <input id="setupToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxx" />
+      <label>设置 4~6 位 PIN</label>
+      <input id="setupPin" type="password" maxlength="6" placeholder="123456" />
+      <button onclick="saveToken()" style="width:100%;padding:14px;border-radius:var(--radius);border:none;background:linear-gradient(135deg,var(--accent) 0%,#7c3aed 100%);color:white;font-weight:600;cursor:pointer;margin-top:24px;">保存并解锁</button>
+      <div class="setup-note">Token 将通过 AES-256-GCM + PBKDF2 加密后存储在本机，不会上传到任何服务器。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== 全局状态 ===== */
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = 'firefly_enc_token';
+
+/* ===== 初始化 ===== */
+$('date').value = new Date().toISOString().slice(0, 10);
+
+/* ===== Base64 编解码（修复中文乱码）===== */
+function base64ToUtf8(base64) {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binaryString = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binaryString += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binaryString);
+}
+
+/* ===== AES 加密 ===== */
+async function getKey(pin, salt) {
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin),
+    { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false, ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptToken(token, pin) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await getKey(pin, salt);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key, new TextEncoder().encode(token)
+  );
+  return {
+    salt: Array.from(salt),
+    iv: Array.from(iv),
+    data: Array.from(new Uint8Array(encrypted))
+  };
+}
+
+async function decryptToken(enc, pin) {
+  const salt = new Uint8Array(enc.salt);
+  const iv = new Uint8Array(enc.iv);
+  const data = new Uint8Array(enc.data);
+  const key = await getKey(pin, salt);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    key, data
+  );
+  return new TextDecoder().decode(decrypted);
+}
+
+/* ===== 锁屏逻辑 ===== */
+function showSetup() {
+  $('lockScreen').style.display = 'none';
+  $('setupScreen').style.display = '';
+}
+
+async function saveToken() {
+  const token = $('setupToken').value.trim();
+  const pin = $('setupPin').value.trim();
+  if (!token.startsWith('ghp_')) return alert('Token 格式不对');
+  if (pin.length < 4) return alert('PIN 至少 4 位');
+  
+  const enc = await encryptToken(token, pin);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(enc));
+  alert('✅ 保存成功，请使用 PIN 登录');
+  location.reload();
+}
+
+async function unlock() {
+  const pin = $('pinInput').value;
+  const enc = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  if (!enc.salt) return alert('请先设置 Token');
+  
+  try {
+    const token = await decryptToken(enc, pin);
+    if (!token.startsWith('ghp_')) throw new Error();
+    window.__GH_AT = token;
+    $('lockScreen').style.display = 'none';
+    $('app').style.display = '';
+  } catch {
+    alert('PIN 错误');
+  }
+}
+
+function logout() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+/* ===== 路径编码（严格逐段 encode）===== */
+function sanitizeFileName(name) {
+  return name.replace(/[<>:"/\\|?*\x00-\x1F]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 80);
+}
+
+function buildGitHubPath(...parts) {
+  return parts.map(p => encodeURIComponent(p)).join('/');
+}
+
+function setStatus(msg, type) {
+  const el = $('status');
+  el.textContent = msg;
+  el.className = type || '';
+}
+
+/* ===== 封面图预览 ===== */
+function updateCoverPreview(url) {
+  const preview = $('coverPreview');
+  const img = $('coverImg');
+  if (url && url.trim()) {
+    img.src = url;
+    preview.classList.add('show');
+  } else {
+    preview.classList.remove('show');
+  }
+}
+
+function removeCover() {
+  $('image').value = '';
+  updateCoverPreview('');
+}
+
+/* ===== 图片上传 ===== */
+const drop = $('drop');
+drop.onclick = () => {
+  const i = document.createElement('input');
+  i.type = 'file'; i.accept = 'image/*';
+  i.onchange = e => uploadImg(e.target.files[0], false);
+  i.click();
+};
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('active'); };
+drop.ondragleave = () => { drop.classList.remove('active'); };
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('active'); uploadImg(e.dataTransfer.files[0], false); };
+
+document.addEventListener('paste', e => {
+  const f = e.clipboardData?.files?.[0];
+  if (f && f.type.startsWith('image/')) uploadImg(f, false);
+});
+
+// 新增：封面图上传按钮事件
+$('coverUploadBtn').onclick = () => {
+  const i = document.createElement('input');
+  i.type = 'file'; i.accept = 'image/*';
+  i.onchange = e => uploadImg(e.target.files[0], true);
+  i.click();
+};
+
+async function uploadImg(file, isCover = false) {
+  const token = window.__GH_AT;
+  if (!token) return alert('未解锁');
+  if (!file) return;
+  
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const ext = file.name.split('.').pop() || 'png';
+  const imgName = Date.now() + '.' + ext;
+  
+  // 严格路径编码
+  const imgPath = buildGitHubPath('public', 'img', 'uploads', y, m, imgName);
+  const api = 'https://api.github.com/repos/phantomxjc/Firefly/contents/' + imgPath;
+  
+  const buf = await file.arrayBuffer();
+  const u8 = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+  
+  setStatus(isCover ? '上传封面图中...' : '上传图片中...');
+  const r = await fetch(api, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ message: 'upload img', content: btoa(bin), branch: 'master' })
+  });
+  
+  if (r.ok) {
+    const md = `/img/uploads/${y}/${m}/${imgName}`;
+    
+    if (isCover) {
+      // 封面图：直接填入隐藏的输入框
+      $('image').value = md;
+      updateCoverPreview(md);
+      setStatus('✅ 封面图上传成功', 'ok');
+    } else {
+      // 正文图片：插入到正文
+      insertMarkdown(`![](${md})`);
+      setStatus('✅ 图片已上传到 public/img/uploads/', 'ok');
+    }
+  } else {
+    const j = await r.json().catch(() => ({}));
+    setStatus('❌ 上传失败: ' + (j.message || r.status), 'err');
+  }
+}
+
+function insertMarkdown(txt) {
+  const ta = $('body');
+  const s = ta.selectionStart;
+  ta.value = ta.value.slice(0, s) + txt + ta.value.slice(s);
+  ta.focus();
+}
+
+/* ===== 发布文章（仅发布新文章）===== */
+async function publish() {
+  const token = window.__GH_AT;
+  const title = $('title').value.trim();
+  if (!title) {
+    setStatus('❌ 标题不能为空', 'err');
+    return;
+  }
+  
+  const safe = sanitizeFileName(title);
+  const articlePath = buildGitHubPath('src', 'content', 'posts', safe, 'index.md');
+  const api = 'https://api.github.com/repos/phantomxjc/Firefly/contents/' + articlePath;
+  
+  const md = `---
+title: "${title}"
+published: ${$('date').value}
+description: "${$('desc').value || ''}"
+tags: [${$('tags').value.split(',').map(t => '"' + t.trim() + '"').filter(Boolean).join(', ')}]
+category: "${$('category').value || ''}"
+draft: ${$('draft').value}
+image: "${$('image').value || ''}"
+---
+
+${$('body').value}`;
+  
+  setStatus('发布中...\n' + articlePath);
+  const r = await fetch(api, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ message: 'new post', content: utf8ToBase64(md), branch: 'master' })
+  });
+  
+  if (r.ok) {
+    setStatus('✅ 发布成功！可以开始写新文章了', 'ok');
+    // 清空表单，准备下一篇
+    $('title').value = '新文章';
+    $('desc').value = '';
+    $('category').value = '';
+    $('tags').value = '';
+    $('image').value = '';
+    $('body').value = '## 正文开始\n\n';
+    $('draft').value = 'false';
+    updateCoverPreview('');
+  } else {
+    const j = await r.json().catch(() => ({}));
+    setStatus('❌ 发布失败: ' + (j.message || r.status), 'err');
+  }
+}
+</script>
+</body>
+</html>
