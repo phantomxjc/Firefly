@@ -1,1 +1,58 @@
-
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Firefly · 后台管理</title>
+  <link rel="icon" href="/favicon/favicon.svg" />
+  <style>
+    :root {
+      --primaryColor: #3b82f6;
+      --primaryLightest: #eff6ff;
+      --textFieldBorderColor: #e2e8f0;
+      --borderRadius: 8px;
+    }
+    #nc-root { min-height: 100vh; }
+    .loading-screen {
+      position: fixed; inset: 0; background: #fff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; font-family: -apple-system, system-ui, sans-serif;
+    }
+    .loading-logo {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #3b82f6, #7c3aed);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: white; margin-bottom: 24px;
+      animation: bounce 1.5s infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .loading-text { color: #94a3b8; font-size: 13px; letter-spacing: 0.1em; }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading-screen">
+    <div class="loading-logo">✦</div>
+    <div class="loading-text">LOADING FIREFLY CMS...</div>
+  </div>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => { const el = document.getElementById('loading'); if (el) el.style.display = 'none'; }, 500);
+    });
+    CMS.registerPreviewStyle(`
+      body { font-family: -apple-system, system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; color: #1a1a1a; line-height: 1.8; }
+      h1 { font-size: 1.8em; margin-bottom: 0.5em; }
+      h2 { font-size: 1.4em; margin-top: 1.5em; margin-bottom: 0.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+      img { max-width: 100%; border-radius: 8px; margin: 1em 0; }
+      code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+      pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; }
+      blockquote { border-left: 4px solid #3b82f6; margin: 1em 0; padding: 0.5em 1em; background: #f8fafc; border-radius: 0 8px 8px 0; }
+      a { color: #3b82f6; }
+      table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+      th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+      th { background: #f8fafc; font-weight: 600; }
+    `);
+  </script>
+</body>
+</html>
