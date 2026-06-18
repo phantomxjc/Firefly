@@ -1,0 +1,9 @@
+name = "firefly-cms-oauth"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+# GitHub OAuth App 配置
+# 这些值需要在 Cloudflare Dashboard 中设置为 Secret（不写在这里）
+# GITHUB_CLIENT_ID = "your_client_id"
+# GITHUB_CLIENT_SECRET = "your_c…cret"
