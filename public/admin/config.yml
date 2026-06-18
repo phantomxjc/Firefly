@@ -4,7 +4,6 @@ backend:
   branch: main
   auth_type: pkce
   app_id: Ov23lixS7lKQxX0fIb1G
-  base_url: https://xjc.ccwu.cc/admin
 
 media_folder: "public/img/uploads"
 public_folder: "/img/uploads"
