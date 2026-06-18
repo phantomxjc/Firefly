@@ -1,0 +1,54 @@
+backend:
+  name: github
+  repo: phantomxjc/Firefly
+  branch: main
+  base_url: https://firefly-cms-oauth.你的子域.workers.dev
+  auth_endpoint: /auth
+
+media_folder: "public/img/uploads"
+public_folder: "/img/uploads"
+
+site_url: https://xjc.ccwu.cc
+display_url: https://xjc.ccwu.cc
+logo_url: https://xjc.ccwu.cc/favicon/favicon.svg
+
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  - name: "posts"
+    label: "📝 文章"
+    folder: "src/content/posts"
+    create: true
+    slug: "{{slug}}"
+    path: "{{slug}}"
+    preview_path: "posts/{{slug}}/"
+    media_folder: "images"
+    public_folder: "./images"
+    editor:
+      preview: true
+    summary: "{{title}} — {{year}}-{{month}}-{{day}}"
+    sortable_fields: ["published", "title", "category"]
+    view_filters:
+      - label: 草稿
+        field: draft
+        pattern: true
+      - label: 已发布
+        field: draft
+        pattern: false
+    fields:
+      - {label: "标题", name: "title", widget: "string"}
+      - {label: "发布日期", name: "published", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD"}
+      - {label: "更新日期", name: "updated", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD"}
+      - {label: "草稿", name: "draft", widget: "boolean", default: false}
+      - {label: "置顶", name: "pinned", widget: "boolean", default: false}
+      - {label: "简介", name: "description", widget: "text", required: false}
+      - {label: "封面图", name: "image", widget: "image", required: false}
+      - {label: "分类", name: "category", widget: "string", required: false}
+      - {label: "标签", name: "tags", widget: "list", required: false, allow_add: true}
+      - {label: "密码保护", name: "password", widget: "string", required: false}
+      - {label: "密码提示", name: "passwordHint", widget: "string", required: false}
+      - {label: "允许评论", name: "comment", widget: "boolean", default: true}
+      - {label: "正文", name: "body", widget: "markdown"}
