@@ -2,8 +2,8 @@ backend:
   name: github
   repo: phantomxjc/Firefly
   branch: main
-  base_url: https://cms.xjc.ccwu.cc
-  auth_endpoint: /auth
+  auth_type: pkce
+  app_id: Ov23lixS7lKQxX0fIb1G
 
 media_folder: "public/img/uploads"
 public_folder: "/img/uploads"
