@@ -21,7 +21,6 @@ collections:
     label: "📝 文章"
     label_singular: "文章"
     folder: "src/content/posts"
-    create: true
     slug: "{{slug}}"
     path: "{{slug}}"
     preview_path: "posts/{{slug}}/"
@@ -130,8 +129,8 @@ collections:
     label: "📄 页面"
     label_singular: "页面"
     folder: "src/content/spec"
-    create: true
-    slug: "{{fields.title}}"
+    slug: "{{slug}}"
+    path: "{{slug}}"
     summary: "{{title}}"
     fields:
       - label: "标题"
