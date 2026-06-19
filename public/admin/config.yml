@@ -22,8 +22,8 @@ collections:
     label_singular: "文章"
     folder: "src/content/posts"
     slug: "{{slug}}"
-    path: "{{slug}}"
-    preview_path: "posts/{{slug}}/"
+    path: "nested/{{slug}}"
+    preview_path: "posts/{{slug}}"
     media_folder: "images"
     public_folder: "./images"
     editor:
