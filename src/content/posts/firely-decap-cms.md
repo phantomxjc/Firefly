@@ -1,9 +1,9 @@
 ---
 title: 给 Firely 博客接入 Decap CMS：完整小白教程
-date: 2026-06-19
 published: 2026-06-19
-updated: 2026-06-19
 draft: false
+date: 2026-06-19
+updated: 2026-06-19
 pinned: true
 description: "不想要本地部署环境  就用别的方法 "
 image: images/298be83c-4497-4a69-a48e-191c85df8f09.png
@@ -89,57 +89,130 @@ Decap CMS 的 GitHub 认证需要一个**中间服务**来处理 OAuth 回调。
 4. 点击创建，然后点击 **Edit Code**
 5. 把默认代码全部删除，粘贴以下代码：
 
-```javascript
-// Cloudflare Worker - Decap CMS GitHub OAuth 回调服务
+```const GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize";
+const GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
+
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url);
-    const path = url.pathname;
+    const { pathname } = url;
 
-    // 授权端点：跳转到 GitHub OAuth
-    if (path === "/authorize") {
-      const state = url.searchParams.get("state") || "";
-      const redirectUri = url.searchParams.get("redirect_uri") || "";
-      const encodedState = encodeURIComponent(state + ":::" + redirectUri);
-      
-      const githubAuthUrl = "https://github.com/login/oauth/authorize" +
-        "?client_id=" + CLIENT_ID +
-        "&redirect_uri=" + encodeURIComponent("https://" + url.hostname + "/callback") +
-        "&state=" + encodedState;
-      
-      return Response.redirect(githubAuthUrl, 302);
-    }
-
-    // 回调端点：接收 GitHub 的授权码
-    if (path === "/callback") {
-      const code = url.searchParams.get("code") || "";
-      const state = url.searchParams.get("state") || "";
-      
-      // 用 code 换取 access_token
-      const tokenResp = await fetch("https://github.com/login/oauth/access_token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({
-          client_id: CLIENT_ID,
-          client_secret: CLIENT_SECRET,
-          code: code
-        })
-      });
-      const tokenData = await tokenResp.json();
-      const accessToken = tokenData.access_token;
-
-      // 解析 state（格式：原来的state:::原来的redirect_uri）
-      const [origState, redirectUri] = decodeURIComponent(state).split(":::");
-
-      // 跳转回 Decap CMS，带上 token
-      const successUrl = redirectUri + "#access_token=" + accessToken +
-        "&token_type=bearer&state=" + encodeURIComponent(origState || "");
-      return Response.redirect(successUrl, 302);
-    }
+    if (pathname === "/auth") return handleAuth(url, env);
+    if (pathname === "/callback") return handleCallback(url, env);
+    if (pathname === "/") return new Response("Firefly CMS OAuth Proxy ✅");
 
     return new Response("Not Found", { status: 404 });
-  }
+  },
 };
+
+function handleAuth(url, env) {
+  const clientId = env.GITHUB_CLIENT_ID;
+  if (!clientId) {
+    return new Response("GITHUB_CLIENT_ID not configured", { status: 500 });
+  }
+  const redirectUri = `${url.origin}/callback`;
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: "repo,user",
+    state: crypto.randomUUID(),
+  });
+  return Response.redirect(`${GITHUB_AUTH_URL}?${params}`, 302);
+}
+
+async function handleCallback(url, env) {
+  const code = url.searchParams.get("code");
+  if (!code) {
+    return new Response("Missing code", { status: 400 });
+  }
+
+  try {
+    const resp = await fetch(GITHUB_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        client_id: env.GITHUB_CLIENT_ID,
+        client_secret: env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: `${url.origin}/callback`,
+      }),
+    });
+    const data = await resp.json();
+    if (data.error) {
+      return new Response(`Error: ${data.error_description || data.error}`, { status: 400 });
+    }
+    const token = data.access_token;
+    if (!token) {
+      return new Response("No token received", { status: 500 });
+    }
+
+    const content = JSON.stringify({ token, provider: "github" });
+    const successMsg = `authorization:github:success:${content}`;
+    // 转义引号，防止破坏 JS 字符串
+    const successMsgEscaped = successMsg.replace(/"/g, '\\"');
+
+    const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Auth</title></head>
+<body>
+<p style="text-align:center;margin-top:40px;">认证成功，正在关闭...</p>
+<script>
+(function() {
+  var opener = window.opener;
+  if (!opener) {
+    document.body.innerHTML = "<p style='text-align:center;margin-top:40px;color:red;'>无法找到主窗口，请检查是否被浏览器拦截了弹窗</p>";
+    return;
+  }
+
+  // 阶段 1：发送 handshake，等待 CMS 回复
+  function step1() {
+    opener.postMessage("authorizing:github", "*");
+  }
+
+  // 阶段 2：收到 CMS 的 authorizing:github 回复后，发送 token
+  function handleHandshakeReply(e) {
+    if (e.data === "authorizing:github") {
+      window.removeEventListener("message", handleHandshakeReply, false);
+      opener.postMessage("${successMsgEscaped}", "*");
+      setTimeout(function() { window.close(); }, 300);
+    }
+  }
+
+  window.addEventListener("message", handleHandshakeReply, false);
+
+  // 发送握手，如果没收到回复就再发一次，最多试 5 次
+  var attempts = 0;
+  function tryHandshake() {
+    attempts++;
+    step1();
+    if (attempts < 5) {
+      setTimeout(tryHandshake, 800);
+    } else {
+      // 5 次握手都没回应，直接发 token（兼容降级）
+      window.removeEventListener("message", handleHandshakeReply, false);
+      opener.postMessage("${successMsgEscaped}", "*");
+      setTimeout(function() { window.close(); }, 300);
+    }
+  }
+  tryHandshake();
+})();
+</script>
+</body>
+</html>`;
+
+    return new Response(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+      },
+    });
+  } catch (e) {
+    return new Response(`Error: ${e.message}`, { status: 500 });
+  }
+}
 
 // 把这两个值替换成你自己的！
 const CLIENT_ID = "你的ClientID";
