@@ -3,7 +3,8 @@ published: 2026-06-19
 updated: 2026-06-19
 draft: false
 pinned: false
-description: ces1
-image: images/firefly1.avif
+description: 测试
+image: images/firefly3.avif
+category: 生活
 comment: true
 body: 测试
