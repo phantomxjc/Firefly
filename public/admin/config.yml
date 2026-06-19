@@ -31,13 +31,9 @@ collections:
       preview: true
     summary: "{{title}} — {{published}} {{#draft}}[草稿]{{/draft}}"
     sortable_fields:
-      - name: "published"
-        label: "发布日期"
-        default: true
-      - name: "title"
-        label: "标题"
-      - name: "category"
-        label: "分类"
+      - "published"
+      - "title"
+      - "category"
     view_filters:
       - label: "全部"
         field: draft
@@ -49,11 +45,9 @@ collections:
         field: draft
         pattern: true
     view_groups:
-      - label: "按年份"
-        field: published
-        pattern: \d{4}
       - label: "按分类"
         field: category
+        pattern: ".+"
     fields:
       - label: "标题"
         name: "title"
@@ -66,7 +60,6 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: false
         format: "YYYY-MM-DD"
-        default: "{{now}}"
       - label: "更新日期"
         name: "updated"
         widget: "datetime"
@@ -150,7 +143,6 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: false
         format: "YYYY-MM-DD"
-        default: "{{now}}"
       - label: "更新日期"
         name: "updated"
         widget: "datetime"
@@ -165,72 +157,3 @@ collections:
       - label: "正文"
         name: "body"
         widget: "markdown"
-
-  - name: "config"
-    label: "⚙️ 站点设置"
-    editor:
-      preview: false
-    files:
-      - label: "站点信息"
-        name: "site"
-        file: "src/config/siteConfig.ts"
-        fields:
-          - label: "站点标题"
-            name: "title"
-            widget: "string"
-          - label: "站点副标题"
-            name: "subtitle"
-            widget: "string"
-          - label: "站点描述"
-            name: "description"
-            widget: "text"
-          - label: "站点关键词"
-            name: "keywords"
-            widget: "list"
-            field:
-              label: "关键词"
-              name: "keyword"
-              widget: "string"
-          - label: "开始日期"
-            name: "siteStartDate"
-            widget: "date"
-            date_format: "YYYY-MM-DD"
-            time_format: false
-            format: "YYYY-MM-DD"
-          - label: "时区"
-            name: "timezone"
-            widget: "string"
-            default: "Asia/Shanghai"
-      - label: "资料卡"
-        name: "profile"
-        file: "src/config/profileConfig.ts"
-        fields:
-          - label: "头像"
-            name: "avatar"
-            widget: "image"
-          - label: "昵称"
-            name: "name"
-            widget: "string"
-          - label: "个人简介"
-            name: "bio"
-            widget: "text"
-          - label: "社交链接 (GitHub)"
-            name: "github"
-            widget: "string"
-            required: false
-          - label: "社交链接 (Twitter/X)"
-            name: "twitter"
-            widget: "string"
-            required: false
-          - label: "社交链接 (哔哩哔哩)"
-            name: "bilibili"
-            widget: "string"
-            required: false
-          - label: "社交链接 (邮箱)"
-            name: "email"
-            widget: "string"
-            required: false
-          - label: "社交链接 (个人网站)"
-            name: "website"
-            widget: "string"
-            required: false
