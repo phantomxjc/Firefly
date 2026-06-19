@@ -1,7 +1,7 @@
 backend:
   name: github
   repo: phantomxjc/Firefly
-  branch: main
+  branch: master
   base_url: https://cms.xjc.ccwu.cc
   auth_endpoint: /auth
 
