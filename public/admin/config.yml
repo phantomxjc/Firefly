@@ -2,8 +2,8 @@ backend:
   name: github
   repo: phantomxjc/Firefly
   branch: main
-  auth_type: pkce
-  app_id: Ov23lixS7lKQxX0fIb1G
+  base_url: https://cms.xjc.ccwu.cc
+  auth_endpoint: /auth
 
 media_folder: "public/img/uploads"
 public_folder: "/img/uploads"
@@ -19,6 +19,7 @@ slug:
 collections:
   - name: "posts"
     label: "📝 文章"
+    label_singular: "文章"
     folder: "src/content/posts"
     create: true
     slug: "{{slug}}"
@@ -28,26 +29,208 @@ collections:
     public_folder: "./images"
     editor:
       preview: true
-    summary: "{{title}} — {{year}}-{{month}}-{{day}}"
-    sortable_fields: ["published", "title", "category"]
+    summary: "{{title}} — {{published}} {{#draft}}[草稿]{{/draft}}"
+    sortable_fields:
+      - name: "published"
+        label: "发布日期"
+        default: true
+      - name: "title"
+        label: "标题"
+      - name: "category"
+        label: "分类"
     view_filters:
-      - label: 草稿
+      - label: "全部"
         field: draft
-        pattern: true
-      - label: 已发布
+        pattern: ""
+      - label: "已发布"
         field: draft
         pattern: false
+      - label: "草稿"
+        field: draft
+        pattern: true
+    view_groups:
+      - label: "按年份"
+        field: published
+        pattern: \d{4}
+      - label: "按分类"
+        field: category
     fields:
-      - {label: "标题", name: "title", widget: "string"}
-      - {label: "发布日期", name: "published", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD"}
-      - {label: "更新日期", name: "updated", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD"}
-      - {label: "草稿", name: "draft", widget: "boolean", default: false}
-      - {label: "置顶", name: "pinned", widget: "boolean", default: false}
-      - {label: "简介", name: "description", widget: "text", required: false}
-      - {label: "封面图", name: "image", widget: "image", required: false}
-      - {label: "分类", name: "category", widget: "string", required: false}
-      - {label: "标签", name: "tags", widget: "list", required: false, allow_add: true}
-      - {label: "密码保护", name: "password", widget: "string", required: false}
-      - {label: "密码提示", name: "passwordHint", widget: "string", required: false}
-      - {label: "允许评论", name: "comment", widget: "boolean", default: true}
-      - {label: "正文", name: "body", widget: "markdown"}
+      - label: "标题"
+        name: "title"
+        widget: "string"
+        hint: "文章标题"
+        pattern: [".+", "标题不能为空"]
+      - label: "发布日期"
+        name: "published"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+        default: "{{now}}"
+      - label: "更新日期"
+        name: "updated"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: "草稿"
+        name: "draft"
+        widget: "boolean"
+        default: false
+        hint: "设为 true 将不会在网站上显示"
+      - label: "置顶"
+        name: "pinned"
+        widget: "boolean"
+        default: false
+        hint: "设为 true 将置顶显示"
+      - label: "简介"
+        name: "description"
+        widget: "text"
+        required: false
+        hint: "文章摘要，留空则自动截取正文开头"
+      - label: "封面图"
+        name: "image"
+        widget: "image"
+        required: false
+        hint: "文章封面图片（可选）"
+      - label: "分类"
+        name: "category"
+        widget: "select"
+        required: false
+        options:
+          - { label: "技术", value: "技术" }
+          - { label: "生活", value: "生活" }
+          - { label: "教程", value: "教程" }
+          - { label: "随笔", value: "随笔" }
+          - { label: "开源", value: "开源" }
+          - { label: "其他", value: "其他" }
+      - label: "标签"
+        name: "tags"
+        widget: "list"
+        required: false
+        hint: "文章标签，回车添加"
+        field:
+          label: "标签"
+          name: "tag"
+          widget: "string"
+      - label: "密码保护"
+        name: "password"
+        widget: "string"
+        required: false
+        hint: "设置后访问此文章需要输入密码"
+      - label: "密码提示"
+        name: "passwordHint"
+        widget: "string"
+        required: false
+        hint: "访问者看到的密码输入提示"
+      - label: "允许评论"
+        name: "comment"
+        widget: "boolean"
+        default: true
+      - label: "正文"
+        name: "body"
+        widget: "markdown"
+        hint: "Markdown 格式的正文内容"
+
+  - name: "pages"
+    label: "📄 页面"
+    label_singular: "页面"
+    folder: "src/content/spec"
+    create: true
+    slug: "{{fields.title}}"
+    summary: "{{title}}"
+    fields:
+      - label: "标题"
+        name: "title"
+        widget: "string"
+      - label: "发布日期"
+        name: "published"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+        default: "{{now}}"
+      - label: "更新日期"
+        name: "updated"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: "草稿"
+        name: "draft"
+        widget: "boolean"
+        default: false
+      - label: "正文"
+        name: "body"
+        widget: "markdown"
+
+  - name: "config"
+    label: "⚙️ 站点设置"
+    editor:
+      preview: false
+    files:
+      - label: "站点信息"
+        name: "site"
+        file: "src/config/siteConfig.ts"
+        fields:
+          - label: "站点标题"
+            name: "title"
+            widget: "string"
+          - label: "站点副标题"
+            name: "subtitle"
+            widget: "string"
+          - label: "站点描述"
+            name: "description"
+            widget: "text"
+          - label: "站点关键词"
+            name: "keywords"
+            widget: "list"
+            field:
+              label: "关键词"
+              name: "keyword"
+              widget: "string"
+          - label: "开始日期"
+            name: "siteStartDate"
+            widget: "date"
+            date_format: "YYYY-MM-DD"
+            time_format: false
+            format: "YYYY-MM-DD"
+          - label: "时区"
+            name: "timezone"
+            widget: "string"
+            default: "Asia/Shanghai"
+      - label: "资料卡"
+        name: "profile"
+        file: "src/config/profileConfig.ts"
+        fields:
+          - label: "头像"
+            name: "avatar"
+            widget: "image"
+          - label: "昵称"
+            name: "name"
+            widget: "string"
+          - label: "个人简介"
+            name: "bio"
+            widget: "text"
+          - label: "社交链接 (GitHub)"
+            name: "github"
+            widget: "string"
+            required: false
+          - label: "社交链接 (Twitter/X)"
+            name: "twitter"
+            widget: "string"
+            required: false
+          - label: "社交链接 (哔哩哔哩)"
+            name: "bilibili"
+            widget: "string"
+            required: false
+          - label: "社交链接 (邮箱)"
+            name: "email"
+            widget: "string"
+            required: false
+          - label: "社交链接 (个人网站)"
+            name: "website"
+            widget: "string"
+            required: false
