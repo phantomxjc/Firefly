@@ -18,11 +18,19 @@ slug:
 
 collections:
   - name: "posts"
-    label: "📝 文章"
+    label: "文章"
     label_singular: "文章"
     folder: "src/content/posts"
     slug: "{{slug}}"
-    path: "{{slug}}"
+    # 关键修复 1: 去掉 path: "{{slug}}"
+    #   path 会让 Decap 把文件创建为 posts/{slug}/index.md
+    #   但你的现有文章全是扁平结构 posts/firefly.md
+    #   去掉后 Decap 用 slug: "{{slug}}" 直接生成 posts/firefly.md
+    #
+    # 关键修复 2: 明确 format 和 extension
+    format: "yaml"
+    extension: "md"
+    create: true
     preview_path: "posts/{{slug}}"
     media_folder: "images"
     public_folder: "./images"
@@ -56,6 +64,7 @@ collections:
       - label: "发布日期"
         name: "published"
         widget: "datetime"
+        required: true
         date_format: "YYYY-MM-DD"
         time_format: false
         format: "YYYY-MM-DD"
@@ -96,16 +105,18 @@ collections:
           - { label: "教程", value: "教程" }
           - { label: "随笔", value: "随笔" }
           - { label: "开源", value: "开源" }
+          - { label: "文章示例", value: "文章示例" }
           - { label: "其他", value: "其他" }
+      # 关键修复 3: tags 改为简单 string list，去掉嵌套 field
+      #   原配置 field: { name: "tag", widget: "string" } 会让 Decap
+      #   把 tags 存为 [{tag: "Markdown"}, {tag: "Firefly"}]
+      #   但实际文件是 tags: [Markdown, Firefly]
+      #   去掉嵌套 field 后，Decap 直接存为字符串数组
       - label: "标签"
         name: "tags"
         widget: "list"
         required: false
         hint: "文章标签，回车添加"
-        field:
-          label: "标签"
-          name: "tag"
-          widget: "string"
       - label: "密码保护"
         name: "password"
         widget: "string"
@@ -120,17 +131,20 @@ collections:
         name: "comment"
         widget: "boolean"
         default: true
+        required: false
       - label: "正文"
         name: "body"
         widget: "markdown"
         hint: "Markdown 格式的正文内容"
 
   - name: "pages"
-    label: "📄 页面"
+    label: "页面"
     label_singular: "页面"
     folder: "src/content/spec"
     slug: "{{slug}}"
-    path: "{{slug}}"
+    format: "yaml"
+    extension: "md"
+    create: true
     summary: "{{title}}"
     fields:
       - label: "标题"
@@ -139,6 +153,7 @@ collections:
       - label: "发布日期"
         name: "published"
         widget: "datetime"
+        required: true
         date_format: "YYYY-MM-DD"
         time_format: false
         format: "YYYY-MM-DD"
