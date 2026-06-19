@@ -1,3 +1,20 @@
+# ================================================================
+# Firefly Decap CMS 配置修复方案
+# ================================================================
+# 
+# ❌ 上一版 config.yml 的 format: "yaml" 是致命错误
+#    format: "yaml" = 整个文件都是 YAML，无 --- 分隔符
+#    format: "yaml-frontmatter" = YAML frontmatter + markdown body（.md 默认值）
+#    修复：去掉 format，让 Decap CMS 使用默认的 yaml-frontmatter
+#
+# ❌ path: "{{slug}}" 导致嵌套目录与扁平文件冲突
+#    修复：去掉 path，只保留 slug
+#
+# ❌ tags 的嵌套 field 导致对象数组 vs 字符串数组冲突
+#    修复：去掉嵌套 field
+#
+# ================================================================
+
 backend:
   name: github
   repo: phantomxjc/Firefly
@@ -22,15 +39,10 @@ collections:
     label_singular: "文章"
     folder: "src/content/posts"
     slug: "{{slug}}"
-    # 关键修复 1: 去掉 path: "{{slug}}"
-    #   path 会让 Decap 把文件创建为 posts/{slug}/index.md
-    #   但你的现有文章全是扁平结构 posts/firefly.md
-    #   去掉后 Decap 用 slug: "{{slug}}" 直接生成 posts/firefly.md
-    #
-    # 关键修复 2: 明确 format 和 extension
-    format: "yaml"
-    extension: "md"
     create: true
+    # ⚠️ 不要加 format 字段！默认就是 yaml-frontmatter
+    # ⚠️ 不要加 extension 字段！默认就是 .md
+    # ⚠️ 不要加 path 字段！你的文章全是扁平结构
     preview_path: "posts/{{slug}}"
     media_folder: "images"
     public_folder: "./images"
@@ -105,13 +117,9 @@ collections:
           - { label: "教程", value: "教程" }
           - { label: "随笔", value: "随笔" }
           - { label: "开源", value: "开源" }
+          - { label: "博客指南", value: "博客指南" }
           - { label: "文章示例", value: "文章示例" }
           - { label: "其他", value: "其他" }
-      # 关键修复 3: tags 改为简单 string list，去掉嵌套 field
-      #   原配置 field: { name: "tag", widget: "string" } 会让 Decap
-      #   把 tags 存为 [{tag: "Markdown"}, {tag: "Firefly"}]
-      #   但实际文件是 tags: [Markdown, Firefly]
-      #   去掉嵌套 field 后，Decap 直接存为字符串数组
       - label: "标签"
         name: "tags"
         widget: "list"
@@ -142,8 +150,6 @@ collections:
     label_singular: "页面"
     folder: "src/content/spec"
     slug: "{{slug}}"
-    format: "yaml"
-    extension: "md"
     create: true
     summary: "{{title}}"
     fields:
