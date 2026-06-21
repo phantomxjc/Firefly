@@ -6,6 +6,9 @@ draft: false
 pinned: false
 description: python爬虫浅见
 image: images/python-.png
+category: 技术
+tags:
+  - python爬虫
 comment: true
 ---
 ## 一、爬虫基础概念
