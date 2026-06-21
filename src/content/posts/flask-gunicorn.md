@@ -1,852 +1,701 @@
 ---
-title: Flask + Gunicorn 部署详细笔记
+title: " Selenium 自动化测试学习笔记"
 published: 2026-06-22
 updated: 2026-06-22
 draft: false
 pinned: false
-description: Flask + Gunicorn 部署详细笔记
+description: Selenium 自动化测试学习笔记
 category: 技术
 tags:
-  - flask项目部署
-comment: true
+  - selinum
 ---
-## 一、环境问题诊断与解决
+## 一、Selenium 基础概念
 
-### 1.1 常见问题：`python: command not found`
+### 1.1 什么是 Selenium？
 
-#### 问题原因：
+* **定义**：Selenium 是一个开源的自动化测试框架，用于自动化 Web 应用程序的测试
+* **主要用途**：
 
-1. 系统未安装 Python
-2. 只安装了 Python 3，但没有设置 `python`命令别名
-3. Python 路径不在系统 PATH 中
+  * 自动化功能测试
+  * 自动化回归测试
+  * Web 爬虫和数据采集
+  * 自动化重复性任务
+* **支持语言**：Java、Python、C#、Ruby、JavaScript 等
+* **支持浏览器**：Chrome、Firefox、Safari、Edge、IE 等
 
-#### 诊断步骤：
+### 1.2 Selenium 的三个主要版本
 
-```
-# 1. 检查系统类型
-cat /etc/os-release
-# 或
-lsb_release -a
-
-# 2. 查找已安装的 Python
-which python
-which python3
-find /usr/bin -name "python*"
+* **Selenium 1.0（Selenium RC）** ：已过时
+* **Selenium 2.0（WebDriver）** ：当前主流版本
+* **Selenium 3.0/4.0**：最新版本，增强了功能和性能
 
-# 3. 检查 Python 版本
-python3 --version
-```
+## 二、环境搭建
 
-#### 解决方案：
+### 2.1 Python 环境安装
 
-**Ubuntu/Debian 系统：**
+#### 安装 Selenium 库
 
 ```
-# 安装 Python 3
-sudo apt update
-sudo apt install -y python3 python3-pip python3-venv
-
-# 设置 python 命令指向 python3
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-# 或
-sudo ln -s /usr/bin/python3 /usr/bin/python
+pip install selenium
 ```
 
-**CentOS/RHEL/Rocky Linux：**
+#### 验证安装
 
 ```
-# 安装 Python 3
-sudo yum install -y python3 python3-pip
-# 或
-sudo dnf install -y python3 python3-pip
-
-# 创建软链接
-sudo ln -s /usr/bin/python3 /usr/bin/python
+import selenium
+print(selenium.__version__)
 ```
 
-**Alpine Linux：**
+### 2.2 WebDriver 配置
 
-```
-apk add python3 py3-pip
-ln -s /usr/bin/python3 /usr/bin/python
-```
+#### 下载 WebDriver
 
-### 1.2 验证安装
+* **Chrome**：下载 ChromeDriver（[https://chromedriver.chromium.org/](https://chromedriver.chromium.org/)）
+* **Firefox**：下载 GeckoDriver（[https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases)）
+* **Edge**：下载 EdgeDriver（[https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)）
 
-```
-# 检查 Python
-python --version
-# 应该显示：Python 3.x.x
+#### 配置 WebDriver 路径
 
-# 检查 pip
-pip --version
-# 或
-pip3 --version
 ```
+from selenium import webdriver
 
-## 二、Flask 应用基础部署
+# 方式1：指定完整路径
+driver = webdriver.Chrome('/path/to/chromedriver')
 
-### 2.1 项目目录结构
+# 方式2：将 WebDriver 加入系统 PATH，直接使用
+driver = webdriver.Chrome()
 
+# 方式3：Selenium 4.0+ 自动下载
+driver = webdriver.Chrome()  # 自动下载匹配版本的 ChromeDriver
 ```
-/usr/local/flaskapp/
-├── venv/                    # 虚拟环境目录
-├── app.py                   # Flask 主应用
-├── requirements.txt         # 依赖文件
-├── gunicorn_config.py       # Gunicorn 配置文件
-├── start.sh                 # 启动脚本
-└── logs/                   # 日志目录
-```
+
+## 三、基本操作
 
-### 2.2 创建虚拟环境
+### 3.1 打开浏览器和网页
 
 ```
-# 1. 进入项目目录
-cd /usr/local/flaskapp
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-# 2. 创建虚拟环境
-python -m venv venv
+# 创建 Chrome 浏览器实例
+driver = webdriver.Chrome()
 
-# 3. 激活虚拟环境
-source venv/bin/activate
-# Windows: venv\Scripts\activate
+# 打开网页
+driver.get('https://www.example.com')
 
-# 4. 验证虚拟环境
-which python
-which pip
-# 应该指向 venv/bin/ 下的可执行文件
-```
+# 获取页面标题
+title = driver.title
+print(title)
 
-### 2.3 安装依赖
+# 获取当前 URL
+url = driver.current_url
+print(url)
 
+# 关闭浏览器
+driver.quit()
 ```
-# 1. 创建 requirements.txt
-cat > requirements.txt << 'EOF'
-flask==2.3.3
-gunicorn==21.2.0
-EOF
 
-# 2. 安装依赖
-pip install -r requirements.txt
-# 或单独安装
-pip install flask gunicorn
-```
+### 3.2 元素定位
 
-### 2.4 创建 Flask 应用
+#### 八种定位方式
 
 ```
-# app.py
-from flask import Flask, jsonify
-import os
-import socket
+from selenium.webdriver.common.by import By
 
-app = Flask(__name__)
+# 1. ID 定位
+element = driver.find_element(By.ID, 'element_id')
 
-@app.route('/')
-def home():
-    return '''
-    <h1>Flask 应用运行正常！</h1>
-    <p>服务器: {}</p>
-    <p>Python: {}</p>
-    <p>时间: {}</p>
-    '''.format(
-        socket.gethostname(),
-        os.popen('python --version').read().strip(),
-        os.popen('date').read().strip()
-    )
+# 2. NAME 定位
+element = driver.find_element(By.NAME, 'element_name')
 
-@app.route('/health')
-def health():
-    return jsonify({
-        'status': 'healthy',
-        'service': 'flask-app',
-        'version': '1.0.0'
-    })
+# 3. CLASS_NAME 定位
+element = driver.find_element(By.CLASS_NAME, 'class_name')
 
-@app.route('/api/data')
-def get_data():
-    return jsonify({
-        'data': [1, 2, 3, 4, 5],
-        'message': 'API 正常工作'
-    })
+# 4. TAG_NAME 定位
+element = driver.find_element(By.TAG_NAME, 'tag_name')
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-```
+# 5. CSS_SELECTOR 定位
+element = driver.find_element(By.CSS_SELECTOR, 'css_selector')
 
-## 三、Gunicorn 配置详解
+# 6. XPATH 定位
+element = driver.find_element(By.XPATH, '//xpath/expression')
 
-### 3.1 基本启动方式
+# 7. LINK_TEXT 定位（完全匹配链接文本）
+element = driver.find_element(By.LINK_TEXT, 'link_text')
 
-```
-# 最简单的启动
-gunicorn app:app
-# 第一个 app 是模块名（app.py），第二个 app 是 Flask 应用实例
+# 8. PARTIAL_LINK_TEXT 定位（部分匹配链接文本）
+element = driver.find_element(By.PARTIAL_LINK_TEXT, 'partial_link_text')
 
-# 指定 worker 数量
-gunicorn -w 4 app:app
+# 查找多个元素
+elements = driver.find_elements(By.CLASS_NAME, 'class_name')
+```
 
-# 指定绑定地址和端口
-gunicorn -b 0.0.0.0:8000 app:app
+#### XPath 常用表达式
 
-# 指定 worker 类型
-gunicorn -w 4 -k gevent app:app
 ```
+# 绝对路径
+//html/body/div/p
 
-### 3.2 Worker 类型选择
+# 相对路径
+//p
 
-| Worker 类型 | 适用场景             | 命令 |
-| ------------- | ---------------------- | ------ |
-| sync        | 同步 I/O，CPU 密集型 | `-k sync`     |
-| gevent      | 异步，I/O 密集型     | `-k gevent`     |
-| eventlet    | 异步，I/O 密集型     | `-k eventlet`     |
-| tornado     | 长连接，WebSocket    | `-k tornado`     |
-| gthread     | 线程池               | `-k gthread`     |
+# 属性定位
+//input[@id='username']
+//input[@type='text']
 
-### 3.3 配置文件方式（推荐）
+# 多个属性
+//input[@id='username' and @type='text']
 
-```
-# gunicorn_config.py
-import multiprocessing
+# 模糊匹配
+//input[contains(@id, 'user')]
+//input[starts-with(@id, 'user')]
+
+# 文本定位
+//button[text()='登录']
+//button[contains(text(), '登')]
 
-# 绑定地址
-bind = "0.0.0.0:8000"
+# 索引定位
+//p[1]  # 第一个 p 标签
+//p[last()]  # 最后一个 p 标签
 
-# Worker 数量（推荐公式：CPU核心数 * 2 + 1）
-workers = multiprocessing.cpu_count() * 2 + 1
-# 或手动指定
-# workers = 4
+# 父元素定位
+//input[@id='username']/..
 
-# Worker 类型
-worker_class = "sync"  # 默认同步
-# worker_class = "gevent"  # 异步
-# worker_class = "gthread"  # 线程
-# worker_class = "eventlet"  # 异步
+# 兄弟元素定位
+//input[@id='username']/following-sibling::button
+```
 
-# 线程数（当使用 gthread 时）
-threads = 2
+### 3.3 元素交互
 
-# 每个 worker 的最大请求数
-max_requests = 1000
-max_requests_jitter = 50  # 随机抖动，避免所有 worker 同时重启
+```
+# 点击元素
+element.click()
 
-# 超时时间
-timeout = 120
-keepalive = 2
+# 输入文本
+element.send_keys('text_to_input')
 
-# 日志配置
-accesslog = "-"  # 输出到 stdout，或指定文件路径如 "logs/access.log"
-errorlog = "logs/error.log"
-loglevel = "info"
+# 清空输入框
+element.clear()
 
-# 进程名称
-proc_name = "flask_app"
+# 提交表单
+element.submit()
 
-# 是否以守护进程运行
-daemon = False  # 生产环境建议用 systemd 管理
+# 获取元素文本
+text = element.text
 
-# 用户/组（不要用 root）
-# user = "www-data"
-# group = "www-data"
+# 获取元素属性
+attribute = element.get_attribute('attribute_name')
 
-# 工作目录
-chdir = "/usr/local/flaskapp"
+# 获取元素 CSS 属性
+css_value = element.value_of_css_property('property_name')
 
-# 环境变量
-raw_env = [
-    "PYTHONPATH=/usr/local/flaskapp",
-    "FLASK_ENV=production"
-]
+# 判断元素是否可见
+is_displayed = element.is_displayed()
 
-# 预加载应用（减少内存占用，但可能增加重启时间）
-preload_app = True
+# 判断元素是否启用
+is_enabled = element.is_enabled()
 
-# 启用进程守护
-graceful_timeout = 30
-```
+# 判断元素是否被选中
+is_selected = element.is_selected()
 
-### 3.4 使用配置文件启动
+# 获取元素大小
+size = element.size  # {'width': 100, 'height': 50}
 
+# 获取元素位置
+location = element.location  # {'x': 10, 'y': 20}
 ```
-# 使用配置文件启动
-gunicorn -c gunicorn_config.py app:app
+
+## 四、等待机制
 
-# 后台运行
-gunicorn -c gunicorn_config.py --daemon app:app
+### 4.1 隐式等待（Implicit Wait）
 
-# 测试配置文件
-gunicorn --check-config -c gunicorn_config.py app:app
 ```
+from selenium import webdriver
 
-## 四、生产环境优化配置
+driver = webdriver.Chrome()
 
-### 4.1 多配置文件方案
+# 设置隐式等待，单位为秒
+driver.implicitly_wait(10)
 
+# 隐式等待对所有元素查找都有效
+element = driver.find_element(By.ID, 'element_id')
 ```
-# config/base.py - 基础配置
-import multiprocessing
 
-class BaseConfig:
-    bind = "0.0.0.0:8000"
-    workers = multiprocessing.cpu_count() * 2 + 1
-    timeout = 120
-    keepalive = 2
-    max_requests = 1000
-    max_requests_jitter = 50
-    preload_app = True
-```
+**特点**：
 
-```
-# config/production.py - 生产配置
-from .base import BaseConfig
+* 全局设置，对所有元素查找有效
+* 如果元素在指定时间内找到，立即返回
+* 如果超时仍未找到，抛出 NoSuchElementException
 
-class ProductionConfig(BaseConfig):
-    workers = 8
-    worker_class = "gevent"
-    accesslog = "logs/access.log"
-    errorlog = "logs/error.log"
-    loglevel = "warning"
-    proc_name = "flask_app_prod"
-    daemon = True
-  
-    # 安全设置
-    limit_request_line = 4094
-    limit_request_fields = 100
-    limit_request_field_size = 8190
-```
+### 4.2 显式等待（Explicit Wait）
 
 ```
-# config/development.py - 开发配置
-from .base import BaseConfig
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
-class DevelopmentConfig(BaseConfig):
-    workers = 2
-    reload = True  # 开发时自动重载
-    accesslog = "-"
-    errorlog = "-"
-    loglevel = "debug"
-    daemon = False
-```
+driver = webdriver.Chrome()
 
-### 4.2 启动脚本
+# 创建 WebDriverWait 对象，最多等待 10 秒
+wait = WebDriverWait(driver, 10)
 
-```
-#!/bin/bash
-# start.sh
+# 等待元素出现
+element = wait.until(EC.presence_of_element_located((By.ID, 'element_id')))
 
-# 进入项目目录
-cd /usr/local/flaskapp
+# 等待元素可见
+element = wait.until(EC.visibility_of_element_located((By.ID, 'element_id')))
 
-# 激活虚拟环境
-source venv/bin/activate
+# 等待元素可点击
+element = wait.until(EC.element_to_be_clickable((By.ID, 'button_id')))
 
-# 创建日志目录
-mkdir -p logs
+# 等待元素不可见
+wait.until(EC.invisibility_of_element_located((By.ID, 'element_id')))
 
-# 设置环境变量
-export PYTHONPATH=/usr/local/flaskapp
-export FLASK_ENV=production
+# 等待元素被选中
+wait.until(EC.element_to_be_selected((By.ID, 'checkbox_id')))
 
-# 启动 Gunicorn
-exec gunicorn \
-    -c gunicorn_config.py \
-    --pid gunicorn.pid \
-    app:app
-```
+# 等待文本出现
+wait.until(EC.text_to_be_present_in_element((By.ID, 'element_id'), 'expected_text'))
 
-```
-#!/bin/bash
-# stop.sh
+# 等待属性值
+wait.until(EC.text_to_be_present_in_element_value((By.ID, 'input_id'), 'expected_value'))
+
+# 等待 URL 包含特定文本
+wait.until(EC.url_contains('expected_url'))
+
+# 等待 URL 完全匹配
+wait.until(EC.url_to_be('exact_url'))
 
-cd /usr/local/flaskapp
+# 等待标题包含特定文本
+wait.until(EC.title_contains('expected_title'))
 
-if [ -f gunicorn.pid ]; then
-    kill $(cat gunicorn.pid)
-    rm gunicorn.pid
-    echo "Gunicorn 已停止"
-else
-    echo "未找到进程ID文件"
-    pkill -f gunicorn
-fi
+# 等待标题完全匹配
+wait.until(EC.title_is('exact_title'))
+
+# 等待 alert 出现
+alert = wait.until(EC.alert_is_present())
 ```
+
+### 4.3 强制等待（Sleep）
 
 ```
-#!/bin/bash
-# restart.sh
+import time
 
-./stop.sh
-sleep 2
-./start.sh
+# 强制等待 3 秒
+time.sleep(3)
 ```
 
-## 五、系统服务管理
+**注意**：尽量避免使用强制等待，因为会降低测试效率。
 
-### 5.1 使用 systemd（推荐）
+### 4.4 等待最佳实践
 
 ```
-# /etc/systemd/system/flaskapp.service
-[Unit]
-Description=Flask Application with Gunicorn
-After=network.target
+# ✅ 推荐：使用显式等待
+wait = WebDriverWait(driver, 10)
+element = wait.until(EC.element_to_be_clickable((By.ID, 'button_id')))
+element.click()
 
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/usr/local/flaskapp
-Environment="PATH=/usr/local/flaskapp/venv/bin"
-ExecStart=/usr/local/flaskapp/venv/bin/gunicorn -c gunicorn_config.py app:app
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
-Restart=on-failure
-RestartSec=5
-KillMode=mixed
-PrivateTmp=true
+# ❌ 不推荐：使用隐式等待
+driver.implicitly_wait(10)
+element = driver.find_element(By.ID, 'button_id')
+element.click()
 
-[Install]
-WantedBy=multi-user.target
+# ❌ 不推荐：使用强制等待
+time.sleep(10)
+element = driver.find_element(By.ID, 'button_id')
+element.click()
 ```
 
-### 5.2 管理命令
+## 五、高级操作
 
+### 5.1 鼠标操作
+
 ```
-# 重载 systemd 配置
-sudo systemctl daemon-reload
+from selenium.webdriver.common.action_chains import ActionChains
 
-# 启动服务
-sudo systemctl start flaskapp
+driver = webdriver.Chrome()
+actions = ActionChains(driver)
 
-# 停止服务
-sudo systemctl stop flaskapp
+# 悬停
+actions.move_to_element(element).perform()
 
-# 重启服务
-sudo systemctl restart flaskapp
+# 右键点击
+actions.context_click(element).perform()
 
-# 查看状态
-sudo systemctl status flaskapp
+# 双击
+actions.double_click(element).perform()
 
-# 开机自启
-sudo systemctl enable flaskapp
+# 拖拽
+actions.drag_and_drop(source_element, target_element).perform()
 
-# 查看日志
-sudo journalctl -u flaskapp -f
+# 链式操作
+actions.move_to_element(element1).click().move_to_element(element2).click().perform()
 ```
 
-### 5.3 使用 supervisor
+### 5.2 键盘操作
 
 ```
-; /etc/supervisor/conf.d/flaskapp.conf
-[program:flaskapp]
-command=/usr/local/flaskapp/venv/bin/gunicorn -c gunicorn_config.py app:app
-directory=/usr/local/flaskapp
-user=www-data
-autostart=true
-autorestart=true
-startretries=3
-stderr_logfile=/var/log/flaskapp/error.log
-stdout_logfile=/var/log/flaskapp/access.log
-environment=PATH="/usr/local/flaskapp/venv/bin",PYTHONPATH="/usr/local/flaskapp"
-```
+from selenium.webdriver.common.keys import Keys
 
-## 六、Nginx 反向代理配置
+# 输入特殊键
+element.send_keys(Keys.ENTER)
+element.send_keys(Keys.TAB)
+element.send_keys(Keys.ESCAPE)
+element.send_keys(Keys.SPACE)
+element.send_keys(Keys.BACKSPACE)
+element.send_keys(Keys.DELETE)
 
-### 6.1 Nginx 配置
+# 组合键
+element.send_keys(Keys.CONTROL + 'a')  # Ctrl + A
+element.send_keys(Keys.COMMAND + 'a')  # Cmd + A (Mac)
+element.send_keys(Keys.SHIFT + 'a')    # Shift + A
 
+# 快捷键
+element.send_keys(Keys.CONTROL + Keys.SHIFT + 'a')  # Ctrl + Shift + A
 ```
-# /etc/nginx/sites-available/flaskapp
-upstream flask_app {
-    server 127.0.0.1:8000;
-    # 可以添加多个后端
-    # server 127.0.0.1:8001;
-    # server 127.0.0.1:8002;
-}
+
+### 5.3 下拉框操作
 
-server {
-    listen 80;
-    server_name yourdomain.com www.yourdomain.com;
-  
-    # 访问日志
-    access_log /var/log/nginx/flaskapp_access.log;
-    error_log /var/log/nginx/flaskapp_error.log;
-  
-    # 静态文件处理
-    location /static/ {
-        alias /usr/local/flaskapp/static/;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-  
-    # 媒体文件
-    location /media/ {
-        alias /usr/local/flaskapp/media/;
-        expires 30d;
-    }
-  
-    # 代理到 Gunicorn
-    location / {
-        proxy_pass http://flask_app;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host $server_name;
-  
-        # 超时设置
-        proxy_connect_timeout 75s;
-        proxy_send_timeout 3600s;
-        proxy_read_timeout 3600s;
-  
-        # WebSocket 支持
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-  
-        # 缓冲区设置
-        proxy_buffering off;
-        proxy_request_buffering off;
-    }
-  
-    # 安全头部
-    add_header X-Frame-Options DENY;
-    add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block";
-    add_header Referrer-Policy "strict-origin-when-cross-origin";
-}
 ```
+from selenium.webdriver.support.select import Select
 
-### 6.2 启用 SSL（HTTPS）
+# 获取 select 元素
+select_element = driver.find_element(By.ID, 'select_id')
+select = Select(select_element)
 
-```
-# HTTPS 配置
-server {
-    listen 443 ssl http2;
-    server_name yourdomain.com www.yourdomain.com;
-  
-    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-    ssl_session_timeout 1d;
-    ssl_session_cache shared:SSL:50m;
-    ssl_session_tickets off;
-  
-    # 现代 SSL 配置
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-    ssl_prefer_server_ciphers off;
-  
-    # HSTS
-    add_header Strict-Transport-Security "max-age=63072000" always;
-  
-    # 其余配置同上
-    location / {
-        proxy_pass http://flask_app;
-        # ... 其他代理设置
-    }
-}
+# 按可见文本选择
+select.select_by_visible_text('Option 1')
 
-# HTTP 重定向到 HTTPS
-server {
-    listen 80;
-    server_name yourdomain.com www.yourdomain.com;
-    return 301 https://$server_name$request_uri;
-}
-```
+# 按值选择
+select.select_by_value('value1')
 
-## 七、监控与维护
+# 按索引选择
+select.select_by_index(0)
 
-### 7.1 日志管理
+# 获取所有选项
+options = select.options
 
-```
-# 查看实时日志
-tail -f logs/error.log
-tail -f logs/access.log
+# 获取当前选中的选项
+selected_option = select.first_selected_option
 
-# 使用 logrotate 管理日志
-cat > /etc/logrotate.d/flaskapp << 'EOF'
-/usr/local/flaskapp/logs/*.log {
-    daily
-    missingok
-    rotate 30
-    compress
-    delaycompress
-    notifempty
-    create 644 www-data www-data
-    sharedscripts
-    postrotate
-        [ -f /usr/local/flaskapp/gunicorn.pid ] && kill -USR1 $(cat /usr/local/flaskapp/gunicorn.pid)
-    endscript
-}
-EOF
+# 取消选择（仅对多选有效）
+select.deselect_by_visible_text('Option 1')
+select.deselect_all()
 ```
 
-### 7.2 进程监控
+### 5.4 Alert 处理
 
 ```
-# 查看 Gunicorn 进程树
-pstree -ap | grep gunicorn
+from selenium.webdriver.common.alert import Alert
+
+# 获取 alert
+alert = driver.switch_to.alert
 
-# 查看进程状态
-ps aux | grep gunicorn
+# 接受 alert
+alert.accept()
 
-# 监控系统资源
-top -p $(pgrep -d',' gunicorn)
+# 拒绝 alert
+alert.dismiss()
 
-# 使用 htop
-htop -p $(pgrep -d',' gunicorn)
+# 获取 alert 文本
+text = alert.text
+
+# 在 alert 中输入文本
+alert.send_keys('text')
+
+# 完整示例
+try:
+    alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
+    alert.accept()
+except:
+    print('No alert found')
 ```
 
-### 7.3 健康检查
+### 5.5 窗口和标签页操作
 
 ```
-# 创建健康检查脚本
-cat > health_check.sh << 'EOF'
-#!/bin/bash
+# 获取当前窗口句柄
+current_handle = driver.current_window_handle
 
-HEALTH_URL="http://localhost:8000/health"
-TIMEOUT=5
-RETRY_COUNT=3
+# 获取所有窗口句柄
+all_handles = driver.window_handles
 
-for i in $(seq 1 $RETRY_COUNT); do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time $TIMEOUT $HEALTH_URL)
-  
-    if [ "$HTTP_CODE" = "200" ]; then
-        echo "应用运行正常"
-        exit 0
-    fi
-  
-    echo "第 $i 次健康检查失败，状态码: $HTTP_CODE"
-    sleep 2
-done
+# 切换到指定窗口
+driver.switch_to.window(all_handles[1])
 
-echo "应用健康检查失败"
-exit 1
-EOF
+# 切换到新打开的窗口
+driver.switch_to.window(driver.window_handles[-1])
 
-chmod +x health_check.sh
-```
+# 关闭当前窗口
+driver.close()
 
-## 八、故障排除
+# 关闭所有窗口
+driver.quit()
 
-### 8.1 常见问题及解决方案
+# 获取窗口大小
+size = driver.get_window_size()
 
-#### 问题1：`Address already in use`
+# 设置窗口大小
+driver.set_window_size(1024, 768)
 
-```
-# 查看占用端口的进程
-sudo lsof -i :8000
-sudo netstat -tulpn | grep :8000
+# 最大化窗口
+driver.maximize_window()
 
-# 杀死进程
-sudo kill -9 <PID>
+# 最小化窗口
+driver.minimize_window()
 
-# 或强制杀死所有 Gunicorn 进程
-pkill -9 gunicorn
+# 全屏
+driver.fullscreen_window()
 ```
 
-#### 问题2：`ImportError: No module named 'flask'`
+### 5.6 Frame 和 IFrame 操作
 
 ```
-# 确保在虚拟环境中
-source venv/bin/activate
+# 切换到 iframe（按索引）
+driver.switch_to.frame(0)
+
+# 切换到 iframe（按 ID）
+driver.switch_to.frame('iframe_id')
 
-# 确认 Flask 已安装
-pip list | grep flask
+# 切换到 iframe（按 name）
+driver.switch_to.frame('iframe_name')
 
-# 重新安装
-pip install -r requirements.txt
+# 切换到 iframe（按元素）
+iframe_element = driver.find_element(By.TAG_NAME, 'iframe')
+driver.switch_to.frame(iframe_element)
+
+# 切换回主文档
+driver.switch_to.default_content()
+
+# 切换到父 frame
+driver.switch_to.parent_frame()
 ```
 
-#### 问题3：Worker 频繁重启
+### 5.7 JavaScript 执行
 
 ```
-# 在 gunicorn_config.py 中调整
-timeout = 300  # 增加超时时间
-max_requests = 10000  # 增加最大请求数
-preload_app = True  # 预加载应用
+# 执行 JavaScript 代码
+driver.execute_script('alert("Hello")')
+
+# 执行 JavaScript 并返回结果
+result = driver.execute_script('return 1 + 1')
+print(result)  # 2
+
+# 滚动页面
+driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+
+# 获取页面高度
+height = driver.execute_script('return document.body.scrollHeight')
+
+# 修改元素样式
+driver.execute_script('arguments[0].style.display="none"', element)
+
+# 获取元素文本（绕过隐藏元素）
+text = driver.execute_script('return arguments[0].innerText', element)
+
+# 异步 JavaScript
+driver.execute_async_script('var callback = arguments[arguments.length - 1]; setTimeout(function() { callback("done"); }, 1000);')
 ```
+
+## 六、常见问题解决
 
-#### 问题4：内存泄漏
+### 6.1 元素定位问题
 
+| 问题                   | 解决方案                                            |
+| ------------------------ | ----------------------------------------------------- |
+| NoSuchElementException | 检查定位器是否正确，使用显式等待                    |
+| 元素不可见             | 使用 visibility\_of\_element\_located 等待 |
+| 元素被遮挡             | 使用 JavaScript 滚动或点击                          |
+| 动态元素               | 使用显式等待和正确的定位器                          |
+
+### 6.2 超时问题
+
 ```
-# 监控内存使用
-watch -n 5 "ps aux --sort=-%mem | head -10"
+# 增加等待时间
+wait = WebDriverWait(driver, 30)
 
-# 配置 worker 重启策略
-max_requests = 1000
-max_requests_jitter = 100
+# 使用 try-except 捕获超时异常
+from selenium.common.exceptions import TimeoutException
+
+try:
+    element = wait.until(EC.presence_of_element_located((By.ID, 'element_id')))
+except TimeoutException:
+    print('Element not found within timeout')
 ```
 
-### 8.2 性能调优
+### 6.3 常见异常
 
 ```
-# gunicorn_config.py
-# 根据服务器配置调整
-import multiprocessing
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    TimeoutException,
+    StaleElementReferenceException,
+    ElementNotVisibleException,
+    ElementNotInteractableException
+)
 
-# CPU 核心数
-cpu_count = multiprocessing.cpu_count()
+try:
+    element = driver.find_element(By.ID, 'element_id')
+except NoSuchElementException:
+    print('Element not found')
+except TimeoutException:
+    print('Timeout waiting for element')
+except StaleElementReferenceException:
+    print('Element is no longer attached to DOM')
+except ElementNotVisibleException:
+    print('Element is not visible')
+except ElementNotInteractableException:
+    print('Element is not interactable')
+```
 
-# 内存限制（MB）
-memory_limit = 4096
+## 七、完整示例
 
-# Worker 数量
-if cpu_count <= 2:
-    workers = 3
-elif cpu_count <= 4:
-    workers = 5
-else:
-    workers = cpu_count * 2 + 1
+### 7.1 登录测试
 
-# Worker 类型选择
-# I/O 密集型：gevent/eventlet
-# CPU 密集型：sync/gthread
-worker_class = "gevent"
-worker_connections = 1000
 ```
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+driver = webdriver.Chrome()
+wait = WebDriverWait(driver, 10)
+
+try:
+    # 打开网页
+    driver.get('https://example.com/login')
+
+    # 输入用户名
+    username_input = wait.until(EC.presence_of_element_located((By.ID, 'username')))
+    username_input.send_keys('testuser')
+
+    # 输入密码
+    password_input = driver.find_element(By.ID, 'password')
+    password_input.send_keys('testpassword')
+
+    # 点击登录按钮
+    login_button = driver.find_element(By.ID, 'login_button')
+    login_button.click()
 
-## 九、完整部署流程总结
+    # 等待登录成功
+    wait.until(EC.url_contains('dashboard'))
 
-### 9.1 一键部署脚本
+    print('Login successful')
 
+finally:
+    driver.quit()
 ```
-#!/bin/bash
-# deploy.sh
 
-set -e  # 出错时退出
+### 7.2 数据采集
 
-echo "=== 开始部署 Flask 应用 ==="
+```
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import csv
 
-# 1. 安装 Python
-if ! command -v python3 &> /dev/null; then
-    echo "安装 Python 3..."
-    sudo apt update
-    sudo apt install -y python3 python3-pip python3-venv
-    sudo ln -s /usr/bin/python3 /usr/bin/python
-fi
+driver = webdriver.Chrome()
 
-# 2. 创建项目目录
-PROJECT_DIR="/usr/local/flaskapp"
-sudo mkdir -p $PROJECT_DIR
-sudo chown -R $USER:$USER $PROJECT_DIR
-cd $PROJECT_DIR
+try:
+    driver.get('https://example.com/products')
 
-# 3. 创建虚拟环境
-echo "创建虚拟环境..."
-python -m venv venv
-source venv/bin/activate
+    # 获取所有产品
+    products = driver.find_elements(By.CLASS_NAME, 'product')
 
-# 4. 安装依赖
-echo "安装依赖..."
-pip install --upgrade pip
-pip install flask gunicorn
+    data = []
+    for product in products:
+        name = product.find_element(By.CLASS_NAME, 'product-name').text
+        price = product.find_element(By.CLASS_NAME, 'product-price').text
+        data.append({'name': name, 'price': price})
 
-# 5. 创建应用文件
-echo "创建应用文件..."
-cat > app.py << 'EOF'
-from flask import Flask, jsonify
-app = Flask(__name__)
+    # 保存到 CSV
+    with open('products.csv', 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=['name', 'price'])
+        writer.writeheader()
+        writer.writerows(data)
 
-@app.route('/')
-def home():
-    return jsonify({'status': 'ok', 'message': '部署成功！'})
+    print(f'Collected {len(data)} products')
 
-@app.route('/health')
-def health():
-    return jsonify({'status': 'healthy'})
+finally:
+    driver.quit()
+```
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-EOF
+## 八、最佳实践
 
-# 6. 创建 Gunicorn 配置
-echo "创建 Gunicorn 配置..."
-cat > gunicorn_config.py << 'EOF'
-bind = "0.0.0.0:8000"
-workers = 4
-worker_class = "sync"
-timeout = 120
-accesslog = "-"
-errorlog = "error.log"
-loglevel = "info"
-EOF
+### 8.1 代码组织
 
-# 7. 创建启动脚本
-echo "创建启动脚本..."
-cat > start.sh << 'EOF'
-#!/bin/bash
-cd /usr/local/flaskapp
-source venv/bin/activate
-exec gunicorn -c gunicorn_config.py app:app
-EOF
-chmod +x start.sh
+```
+# 使用 Page Object Model (POM) 模式
+class LoginPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.username_input = (By.ID, 'username')
+        self.password_input = (By.ID, 'password')
+        self.login_button = (By.ID, 'login_button')
 
-# 8. 创建 systemd 服务
-echo "创建 systemd 服务..."
-sudo cat > /etc/systemd/system/flaskapp.service << EOF
-[Unit]
-Description=Flask Application
-After=network.target
+    def login(self, username, password):
+        self.driver.find_element(*self.username_input).send_keys(username)
+        self.driver.find_element(*self.password_input).send_keys(password)
+        self.driver.find_element(*self.login_button).click()
 
-[Service]
-User=$USER
-Group=$USER
-WorkingDirectory=$PROJECT_DIR
-Environment="PATH=$PROJECT_DIR/venv/bin"
-ExecStart=$PROJECT_DIR/venv/bin/gunicorn -c gunicorn_config.py app:app
-Restart=always
+# 使用
+driver = webdriver.Chrome()
+login_page = LoginPage(driver)
+login_page.login('testuser', 'testpassword')
+```
 
-[Install]
-WantedBy=multi-user.target
-EOF
+### 8.2 错误处理
 
-# 9. 启动服务
-echo "启动服务..."
-sudo systemctl daemon-reload
-sudo systemctl start flaskapp
-sudo systemctl enable flaskapp
+```
+import logging
 
-# 10. 验证部署
-echo "验证部署..."
-sleep 2
-curl -f http://localhost:8000/ || echo "启动失败，请检查日志"
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-echo "=== 部署完成！ ==="
-echo "应用运行在: http://localhost:8000"
-echo "查看状态: sudo systemctl status flaskapp"
-echo "查看日志: sudo journalctl -u flaskapp -f"
+try:
+    element = driver.find_element(By.ID, 'element_id')
+except Exception as e:
+    logger.error(f'Error finding element: {e}')
+    driver.save_screenshot('error.png')
+finally:
+    driver.quit()
 ```
+
+### 8.3 性能优化
 
-### 9.2 使用说明
+* 使用显式等待而不是隐式等待
+* 避免使用强制等待
+* 复用浏览器实例
+* 使用无头模式（Headless）提高速度
+* 并行执行测试
 
+### 8.4 无头模式
+
 ```
-# 给脚本执行权限
-chmod +x deploy.sh
+from selenium.webdriver.chrome.options import Options
 
-# 运行部署脚本
-./deploy.sh
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
 
-# 手动部署步骤
-1. 安装 Python
-2. 创建项目目录
-3. 设置虚拟环境
-4. 安装依赖
-5. 创建应用
-6. 配置 Gunicorn
-7. 配置 Nginx（可选）
-8. 配置 systemd
-9. 启动服务
-10. 验证部署
+driver = webdriver.Chrome(options=options)
 ```
+
+## 九、参考资源
+
+* **官方文档**：[https://www.selenium.dev/documentation/](https://www.selenium.dev/documentation/)
+* **Python 绑定**：[https://selenium-python.readthedocs.io/](https://selenium-python.readthedocs.io/)
+* **GitHub**：[https://github.com/SeleniumHQ/selenium](https://github.com/SeleniumHQ/selenium)
+* **社区论坛**：[https://stackoverflow.com/questions/tagged/selenium](https://stackoverflow.com/questions/tagged/selenium)
 
-## 十、最佳实践总结
+## 十、学习路线
 
-1. **使用虚拟环境**：隔离项目依赖
-2. **使用配置文件**：便于管理和版本控制
-3. **合理配置 Worker**：根据服务器性能调整
-4. **启用日志**：便于问题排查
-5. **使用进程管理**：systemd 或 supervisor
-6. **配置反向代理**：Nginx 处理静态文件和 SSL
-7. **监控和告警**：设置健康检查
-8. **定期更新**：保持依赖包最新
-9. **备份配置**：配置文件纳入版本控制
-10. **安全加固**：使用非 root 用户运行
+1. **基础阶段**：环境搭建、元素定位、基本操作
+2. **进阶阶段**：等待机制、高级操作、异常处理
+3. **实战阶段**：完整项目、Page Object Model、测试框架集成
+4. **优化阶段**：性能优化、并行执行、CI/CD 集成
 
-这个笔记涵盖了从环境准备到生产部署的完整流程，包含了常见问题的解决方案和最佳实践建议。
+**最后更新**：2026年3月30日**学习建议**：边学边练，通过实际项目巩固知识。
