@@ -198,7 +198,34 @@ export const siteConfig: SiteConfig = {
 		// 每页显示的文章数量
 		postsPerPage: 10,
 	},
-
+	////////////////////////////
+	analytics: {
+	  googleAnalyticsId: "",
+	  microsoftClarityId: "",
+	  umamiAnalytics: {
+	    websiteId: "",
+	    scriptUrl: "https://cloud.umami.is/script.js",
+	    replaysScriptUrl: "https://cloud.umami.is/recorder.js",
+	    trackOutboundLinks: true,
+	    collectWebVitals: false,
+	    replays: {
+	      enabled: false,
+	      sampleRate: 0.15,
+	      maskLevel: "moderate",
+	      maxDuration: 300000,
+	      blockSelector: "",
+	    },
+	  },
+	  la51Analytics: {
+	    Id: "",
+	    sdkUrl: "",
+	    ck: "",
+	    autoTrack: false,
+	    hashMode: false,
+	    screenRecord: true,
+	  },
+	},
+	/////////////////////////////
 	// 图像优化及响应式配置
 	// 图像优化压缩只保留avif或webp
 	// 响应式图像是为在不同设备上提高性能而调整的图像。这些图像可以调整大小以适应其容器，并且可以根据访问者的屏幕尺寸和分辨率以不同的大小提供。
