@@ -90,8 +90,14 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				icon: "fa7-brands:gitee",
 			},
 			{
-				name: "发文管理",
+				name: "decap发文管理",
 				url: "https://xjc.ccwu.cc/admin",
+				external: true,
+				icon: "material-symbols:docs",
+			},
+						{
+				name: "pages发文管理",
+				url: "https://app.pagescms.org/",
 				external: true,
 				icon: "material-symbols:docs",
 			},
