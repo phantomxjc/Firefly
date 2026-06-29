@@ -54,7 +54,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	},
 	// 横幅壁纸和全屏壁纸共享配置
 	common: {
-		// 横幅文字遮罩暗度，0-1之间，值越大越暗
+		// 壁纸遮罩暗度，让横幅文字显示更清晰，0-1之间，值越大越暗
 		dimOpacity: 0.2,
 		// 多视频播放模式："order" 顺序循环，"random" 随机切换（仅当 playerUrl 为数组时生效）
 		playerMode: "random",
@@ -216,7 +216,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 				mobile: true,
 			},
 			// 渐变高度
-			height: "15vh",
+			height: "10%",
 			// 是否允许用户通过控制面板切换渐变过渡
 			switchable: true,
 		},
