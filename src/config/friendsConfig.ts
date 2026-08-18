@@ -50,15 +50,24 @@ export const friendsConfig: FriendLink[] = [
 		weight: 8,
 		enabled: true,
 	},
+	{
+		title: "年华",
+		imgurl:
+			"https://weavatar.com/avatar/amamo?s=640",
+		desc: "欢迎来到我的小破站",
+		siteurl: "https://blog.amamo.top",
+		tags: ["Blog"],
+		weight: 7,
+		enabled: true,
+	},
+	{
+		title: "临渊羡鱼",
+		imgurl:
+			"https://weavatar.com/avatar/yufish?s=640",
+		desc: "Wander like a fish",
+		siteurl: "https://x1anyu.cn",
+		tags: ["Blog"],
+		weight: 6,
+		enabled: true,
+	},
 ];
-
-// 获取启用的友链并进行排序
-export const getEnabledFriends = (): FriendLink[] => {
-	const friends = friendsConfig.filter((friend) => friend.enabled);
-
-	if (friendsPageConfig.randomizeSort) {
-		return friends.sort(() => Math.random() - 0.5);
-	}
-
-	return friends.sort((a, b) => b.weight - a.weight);
-};
