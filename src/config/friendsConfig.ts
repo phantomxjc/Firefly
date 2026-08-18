@@ -53,7 +53,7 @@ export const friendsConfig: FriendLink[] = [
 	{
 		title: "年华",
 		imgurl:
-			"https://weavatar.com/avatar/amamo?s=640",
+			"https://avatars.githubusercontent.com/qwc-ch?v=4&s=640",
 		desc: "欢迎来到我的小破站",
 		siteurl: "https://blog.amamo.top",
 		tags: ["Blog"],
@@ -63,7 +63,7 @@ export const friendsConfig: FriendLink[] = [
 	{
 		title: "临渊羡鱼",
 		imgurl:
-			"https://weavatar.com/avatar/yufish?s=640",
+			"https://avatars.githubusercontent.com/ImYufish?v=4&s=640",
 		desc: "Wander like a fish",
 		siteurl: "https://x1anyu.cn",
 		tags: ["Blog"],
