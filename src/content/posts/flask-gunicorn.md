@@ -1,6 +1,7 @@
 ---
 title: " Selenium 自动化测试学习笔记"
 published: 2026-06-22
+image: "api"
 updated: 2026-06-22
 draft: false
 pinned: false
