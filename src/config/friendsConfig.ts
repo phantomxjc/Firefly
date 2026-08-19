@@ -43,3 +43,12 @@ export const friendsConfig: FriendLink[] = [
 		enabled: true,
 	},
 ];
+
+// 获取启用的友链列表，按权重降序排列
+export function getEnabledFriends(): FriendLink[] {
+	const enabled = friendsConfig.filter((link) => link.enabled !== false);
+	if (friendsPageConfig.randomizeSort) {
+		return enabled.sort(() => Math.random() - 0.5);
+	}
+	return enabled.sort((a, b) => b.weight - a.weight);
+}
