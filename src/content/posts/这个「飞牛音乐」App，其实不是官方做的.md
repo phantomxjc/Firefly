@@ -1,6 +1,7 @@
 ---
 title: "这个「飞牛音乐」App，其实不是官方做的"
 published: 2026-08-06
+image: "api"
 description: "这个「飞牛音乐」App，其实不是官方做的"
 tags:
   - "飞牛NAS"
