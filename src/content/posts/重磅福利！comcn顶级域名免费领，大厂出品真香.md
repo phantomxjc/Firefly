@@ -1,6 +1,7 @@
 ---
 title: "重磅福利！com/cn顶级域名免费领，大厂出品真香"
 published: 2026-08-05
+image: "api"
 description: "重磅福利！com/cn顶级域名免费领，大厂出品真香"
 tags:
   - "薅羊毛"
