@@ -1,6 +1,7 @@
 ---
 title: "IDM再见！这个国产下载器，永久免费还无广告"
 published: 2026-07-29
+image: "api"
 description: "IDM再见！这个国产下载器，永久免费还无广告"
 tags:
   - "效率工具"
