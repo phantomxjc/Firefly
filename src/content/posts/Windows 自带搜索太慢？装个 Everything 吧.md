@@ -1,6 +1,7 @@
 ---
 title: "Windows 自带搜索太慢？装个 Everything 吧"
 published: 2026-07-20
+image: "api"
 description: "Windows 自带搜索太慢？装个 Everything 吧"
 tags:
   - "效率工具"
