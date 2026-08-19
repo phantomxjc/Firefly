@@ -1,6 +1,7 @@
 ---
 title: "想学SQL但懒得搭环境？这个在线MySQL白嫖了！"
 published: 2026-07-31
+image: "api"
 description: "想学SQL但懒得搭环境？这个在线MySQL白嫖了！"
 tags:
   - "薅羊毛"
