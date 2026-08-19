@@ -1,6 +1,7 @@
 ---
 title: "飞牛音乐终于内测了！NAS里吃灰的20T无损，终于有救了？"
 published: 2026-07-30
+image: "api"
 description: "飞牛音乐终于内测了！NAS里吃灰的20T无损，终于有救了？"
 tags:
   - "飞牛NAS"
