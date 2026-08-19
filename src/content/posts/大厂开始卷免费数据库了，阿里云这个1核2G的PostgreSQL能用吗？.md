@@ -1,6 +1,7 @@
 ---
 title: "大厂开始卷免费数据库了，阿里云这个1核2G的PostgreSQL能用吗？"
 published: 2026-07-31
+image: "api"
 description: "大厂开始卷免费数据库了，阿里云这个1核2G的PostgreSQL能用吗？"
 tags:
   - "薅羊毛"
