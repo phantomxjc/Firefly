@@ -1,6 +1,7 @@
 ---
 title: 飞牛OS部署HTTPS服务并通过FRP内网穿透完整指南
 published: 2026-06-22
+image: "api"
 updated: 2026-06-22
 draft: false
 pinned: false
