@@ -1,6 +1,7 @@
 ---
 title: " InfinityFree 部署 lylme Spage 终极笔记"
 published: 2026-06-18
+image: "api"
 updated: 2026-06-18
 draft: false
 pinned: false
