@@ -1,6 +1,7 @@
 ---
 title: "薅羊毛，速领！Serv00.com 永久免费虚拟主机终于开启注册了"
 published: 2026-08-05
+image: "api"
 description: "薅羊毛，速领！Serv00.com 永久免费虚拟主机终于开启注册了"
 tags:
   - "薅羊毛"
