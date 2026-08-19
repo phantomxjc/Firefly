@@ -1,6 +1,7 @@
 ---
 title: "波兰免费云服务器：Bohrium，又一个永久免费 VPS"
 published: 2026-07-21
+image: "api"
 description: "波兰免费云服务器：Bohrium，又一个永久免费 VPS"
 tags:
   - "薅羊毛"
