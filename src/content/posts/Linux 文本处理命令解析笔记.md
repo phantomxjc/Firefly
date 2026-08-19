@@ -1,6 +1,7 @@
 ---
 title: Linux 文本处理命令解析笔记
 published: 2026-06-23
+image: "api"
 updated: 2026-06-23
 draft: false
 description: Linux 文本处理命令解析笔记：`grep -Ev '#|^$' conf/nginx.conf > nginx.conf`
