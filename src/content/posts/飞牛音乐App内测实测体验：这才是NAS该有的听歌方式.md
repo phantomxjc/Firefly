@@ -1,6 +1,7 @@
 ---
 title: "飞牛音乐App内测实测体验：这才是NAS该有的听歌方式"
 published: 2026-07-30
+image: "api"
 description: "飞牛音乐App内测实测体验：这才是NAS该有的听歌方式"
 tags:
   - "飞牛NAS"
