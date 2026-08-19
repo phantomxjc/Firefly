@@ -1,6 +1,7 @@
 ---
 title: "电脑越用越卡？这款5MB的开源小工具，把Windows从头到脚整了一遍"
 published: 2026-07-30
+image: "api"
 description: "电脑越用越卡？这款5MB的开源小工具，把Windows从头到脚整了一遍"
 tags:
   - "效率工具"
