@@ -1,6 +1,7 @@
 ---
 title: "箭头音乐新增飞牛音乐支持，NAS 用户又多了一个选择"
 published: 2026-08-06
+image: "api"
 description: "箭头音乐新增飞牛音乐支持，NAS 用户又多了一个选择"
 tags:
   - "飞牛NAS"
