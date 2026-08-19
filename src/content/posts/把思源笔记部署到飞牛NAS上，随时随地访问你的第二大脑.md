@@ -1,6 +1,7 @@
 ---
 title: "把思源笔记部署到飞牛NAS上，随时随地访问你的第二大脑"
 published: 2026-07-30
+image: "api"
 description: "把思源笔记部署到飞牛NAS上，随时随地访问你的第二大脑"
 tags:
   - "飞牛NAS"
