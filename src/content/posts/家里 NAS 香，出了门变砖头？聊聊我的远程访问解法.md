@@ -1,6 +1,7 @@
 ---
 title: "家里 NAS 香，出了门变砖头？聊聊我的远程访问解法"
 published: 2026-07-17
+image: "api"
 description: "家里 NAS 香，出了门变砖头？聊聊我的远程访问解法"
 tags:
   - "效率工具"
