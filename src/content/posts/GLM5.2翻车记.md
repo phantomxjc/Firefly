@@ -1,6 +1,7 @@
 ---
 title: "前两天才推荐的 GLM-5.2，今天就用不了了"
 published: 2026-08-21
+image: "api"
 description: "前两天才推荐的 GLM-5.2，今天就用不了了"
 tags:
   - "效率工具"
