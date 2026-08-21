@@ -1,6 +1,7 @@
 ---
 title: "Motrix v2.0 回归：时隔三年的全能下载器，到底更新了什么"
 published: 2026-08-21
+image: "api"
 description: "Motrix v2.0 回归：时隔三年的全能下载器，到底更新了什么"
 tags:
   - "效率工具"
