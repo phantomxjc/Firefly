@@ -1,8 +1,8 @@
 ---
-title: "又一个免费模型！OpenRouter 上的神秘 Ox Alpha，100 万 token 上下文随便用"
+title: "100万token全免费！OpenRouter神秘模型Ox Alpha，0元随便用"
 published: 2026-08-25
 image: "api"
-description: "又一个免费模型！OpenRouter 上的神秘 Ox Alpha，100 万 token 上下文随便用"
+description: "100万token全免费！OpenRouter神秘模型Ox Alpha，0元随便用"
 tags:
   - "AI"
   - "薅羊毛"
@@ -10,7 +10,7 @@ category: "薅羊毛"
 draft: false
 ---
 
-# 又一个免费模型！OpenRouter 上的神秘 Ox Alpha，100 万 token 上下文随便用
+# 100万token全免费！OpenRouter神秘模型Ox Alpha，0元随便用
 
 **引言：**
 
