@@ -1,8 +1,8 @@
 ---
-title: "白嫖一个域名！Gname 免费注册 .eu.cc，续费也免费"
+title: "白嫖一个域名！3步0元注册+0元续费，Gname这波羊毛别错过"
 published: 2026-08-25
 image: "api"
-description: "白嫖一个域名！Gname 免费注册 .eu.cc，续费也免费"
+description: "白嫖一个域名！3步0元注册+0元续费，Gname这波羊毛别错过"
 tags:
   - "薅羊毛"
   - "免费域名"
@@ -10,7 +10,7 @@ category: "薅羊毛"
 draft: false
 ---
 
-# 白嫖一个域名！Gname 免费注册 .eu.cc，续费也免费
+# 白嫖一个域名！3步0元注册+0元续费，Gname这波羊毛别错过
 
 **引言：**
 
