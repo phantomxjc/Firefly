@@ -7,6 +7,7 @@ tags:
   - "AI工具"
 category: "薅羊毛"
 draft: false
+image: "api"
 ---
 
 # 白嫖12秒视频！Agnes 2.5 Flash 模型免费开放，Pavo AI 直接用
